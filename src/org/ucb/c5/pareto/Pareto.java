@@ -13,7 +13,7 @@ import org.ucb.c5.utils.FileUtils;
 /**
 * Algorithm to extract the Pareto Non-dominated Set
 * 
-* Sample data in moor.txt was randomly generated in Excel
+* Sample data in pareto_example_scores.txt was randomly generated in Excel
 * by calling rand() and then multiplying by numbers, taking
 * the sin, 2^rand(), or 1/rand()
 * The scores of the first 5 datums were also multiplied by 1000
