@@ -43,6 +43,17 @@ public class Pareto {
     //Index of the score array to be used for initial ranking
     private final int rank_index = 0;
     
+    /**
+     * Helper method to read in example data from file.  The TSV
+     * represents a series of score arrays for a list of datums. A datum
+     * might refer to a potential gene encoding, or protein sequences, or
+     * whatever.  Each datum is scored based on independent monotonically
+     * increasing double values, which may represent GC content, secondary
+     * structure, and the like. These values are stored in the array.
+     * 
+     * @return a map from datum name to score array
+     * @throws Exception 
+     */
     private static Map<String, Double[]> readData() throws Exception {
         Map<String, Double[]> out = new HashMap<>();
         String data = FileUtils.readResourceFile("pareto/data/pareto_example_scores.txt");
@@ -60,6 +71,13 @@ public class Pareto {
         return out;
     }
     
+    /**
+     * Provided with a bag of datums and their scores, this algorithm
+     * computes the Pareto Non-Dominated Set
+     * 
+     * @param nameToDatum
+     * @return 
+     */
     public Set<String> extractParetoNondominated(Map<String, Double[]> nameToDatum) {
         //Create an array of the names in arbitrary order
         List<String> ranked = new ArrayList<>(nameToDatum.keySet());
@@ -80,7 +98,14 @@ public class Pareto {
             }
         });
         
-        //Determine the non-dominated set
+        /*Determine the non-dominated set:
+        
+        Starting with the highest-rank end of the List we just sorted,
+        consider putting that datum in the non-dominated set.  If any
+        preexisting members of the non-dominated set dominate the proposed
+        datum, then it does not belong in the set, and the algorithm should
+        continue to the next value.
+        */
         Set<String> out = new HashSet<>();
         Outer: for(String name : ranked) {
             Double[] datum1 = nameToDatum.get(name);
@@ -93,10 +118,23 @@ public class Pareto {
             out.add(name);
         }
         
+        //Return the Pareto Non-dominated set
         return out;
         
     }
     
+    /**
+     * Helper method for determining if one datum (domDatum) dominates another (datum1).
+     * If any score in datum1's data array is better than that of domDatum, then it
+     * is non-dominated
+     * 
+     * This actually doesn't perform quite correctly in the edge case of two identical
+     * datums.  In this case, the correct answer is false, but it would return true.
+     * 
+     * @param domDatum  the datum that may be dominant
+     * @param datum1 the datum that may be dominated
+     * @return true if datum1 is dominated by domDatum
+     */
     private boolean testDominance(Double[] domDatum, Double[] datum1) {
         //If any of the individual scores of datum1 are higher than those of the domDatum, it is not dominated
         for(int i=0; i<datum1.length; i++) {
